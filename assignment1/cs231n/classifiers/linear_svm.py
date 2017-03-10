@@ -74,11 +74,12 @@ def svm_loss_vectorized(W, X, y, reg):
   # result in loss.                                                           #
   #############################################################################
   num_train=X.shape[0]
+  num_classes = W.shape[1]
   score=X.dot(W)
   correct_class_score=score[xrange(num_train),y].reshape(num_train,1)
-  svm_score=np.maximum(score-correct_class_score+1,0)
-  loss_i=np.sum(svm_score,1)-1
-  loss=sum(loss_i)/num_train+0.5*reg*np.sum(W*W)
+  raw_loss=score-correct_class_score+1
+  svm_score=np.maximum(raw_loss,0)
+  loss=sum(np.sum(svm_score,1)-1)/num_train+0.5*reg*np.sum(np.square(W))
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
@@ -93,7 +94,9 @@ def svm_loss_vectorized(W, X, y, reg):
   # to reuse some of the intermediate values that you used to compute the     #
   # loss.                                                                     #
   #############################################################################
-  pass
+  neg_dW=np.zeros((num_train,num_classes))
+  neg_dW[xrange(num_train),y]=np.sum(raw_loss>0,1)
+  dW=X.T.dot((raw_loss>0)-neg_dW)/num_train+reg*W
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
@@ -101,18 +104,8 @@ def svm_loss_vectorized(W, X, y, reg):
   return loss, dW
 
 if __name__ == '__main__':
-  a=np.array([[1,2,3],[2,3,4],[3,4,5],[4,5,6]])
-  b=np.array([0,2,1,2])
-  c=np.array([[1,1],[1,1],[1,1],[1,1]])
-  print 'a'
-  print a
-  print 'b'
-  print b
-  # print a[xrange(4),b]
-  # # print np.maximum(a,3)
-  # print a+b.reshape(4,1)
-  print np.sum(a,1)-1
-  print a
-  print a>3
-  print a*(a>3)
-  print 3+(2>1)
+  a=np.array([[1,2,3],[2,3,4],[3,4,5],[4,5,6],[5,6,7],[6,7,8]])
+  b=np.array([1,2,3,4,5,6,7,8,9])
+  print np.arange(a.shape[0])
+  print a[np.random.choice(np.arange(a.shape[0]),size=4)]
+  print np.argmax(a,axis=1)
