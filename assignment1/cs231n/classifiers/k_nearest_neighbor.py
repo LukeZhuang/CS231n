@@ -121,7 +121,10 @@ class KNearestNeighbor(object):
     # HINT: Try to formulate the l2 distance using matrix multiplication    #
     #       and two broadcast sums.                                         #
     #########################################################################
-    dists = np.sqrt(np.dot(X - self.X_train, (X - self.X_train).T))
+    a=np.sum(np.square(X),1)
+    b=np.sum(np.square(self.X_train),1)
+    c=-2.0*np.dot(X,self.X_train.T)
+    dists = np.sqrt((c.T+a).T+b)
     #########################################################################
     #                         END OF YOUR CODE                              #
     #########################################################################
@@ -153,9 +156,7 @@ class KNearestNeighbor(object):
       # neighbors. Store these labels in closest_y.                           #
       # Hint: Look up the function numpy.argsort.                             #
       #########################################################################
-      k_nearest_index = np.argsort(dists[i, :])[0:k]
-      for index in k_nearest_index:
-      	closest_y.append(self.y_train[index])
+      closest_y=self.y_train[np.argsort(dists[i, :])[0:k]]
       #########################################################################
       # TODO:                                                                 #
       # Now that you have found the labels of the k nearest neighbors, you    #
@@ -163,14 +164,7 @@ class KNearestNeighbor(object):
       # Store this label in y_pred[i]. Break ties by choosing the smaller     #
       # label.                                                                #
       #########################################################################
-      dict = {}
-      for y_label in closest_y:
-      	dict[y_label] = dict[y_label] + 1 if y_label in dict else 1
-      max_num = -1
-      for (k, v) in dict.items():
-      	if v > max_num:
-      		max_num = v
-      		y_pred[i] = k
+      y_pred[i]=np.argmax(np.bincount(closest_y))
       #########################################################################
       #                           END OF YOUR CODE                            # 
       #########################################################################
@@ -179,8 +173,7 @@ class KNearestNeighbor(object):
 
 
 if __name__ == '__main__':
-  a=np.array([[1,2,3],[2,3,4],[3,4,5],[3,3,3]])
-  b=np.array([2,2,2])
-  print np.sqrt(np.sum(np.square(a-b),1))
-  for i in xrang(a.shape[1]):
-    print 
+  a=np.array([[[1,1],[2,2],[3,3]],[[2,2],[3,3],[4,4]],[[3,3],[4,4],[5,5]]])
+  index=[0,2]
+  print np.concatenate(a[index])
+  print a[1]
