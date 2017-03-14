@@ -74,7 +74,9 @@ class TwoLayerNet(object):
     # Store the result in the scores variable, which should be an array of      #
     # shape (N, C).                                                             #
     #############################################################################
-    pass
+    hidden_in=X.dot(W1)+b1
+    hidden_out=np.maximum(hidden_in,0)
+    scores=hidden_out.dot(W2)+b2
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
@@ -92,7 +94,10 @@ class TwoLayerNet(object):
     # classifier loss. So that your results match ours, multiply the            #
     # regularization loss by 0.5                                                #
     #############################################################################
-    pass
+    scores-=np.max(scores,1,keepdims=True)
+    scores=np.exp(scores)
+    loss_i=-np.log(scores[xrange(N),y]/np.sum(scores,1))
+    loss=np.sum(loss_i)/N+0.5*reg*(np.sum(W1*W1)+np.sum(b1*b1)+np.sum(W2*W2)+np.sum(b2*b2))
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
@@ -215,4 +220,7 @@ class TwoLayerNet(object):
 
     return y_pred
 
-
+if __name__ == '__main__':
+  a=np.array([[1,2],[2,3],[3,4]])
+  b=np.array([2,2,2]).reshape(3,1)
+  print a*b
