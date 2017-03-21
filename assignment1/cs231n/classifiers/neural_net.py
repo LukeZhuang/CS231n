@@ -109,7 +109,17 @@ class TwoLayerNet(object):
     # and biases. Store the results in the grads dictionary. For example,       #
     # grads['W1'] should store the gradient on W1, and be a matrix of same size #
     #############################################################################
-    pass
+    d_scores=np.copy(scores)
+    d_scores[xrange(N),y]-=np.sum(scores,1)
+    d_scores/=np.sum(scores,1,keepdims=True)
+    d_scores/=N
+    grads['W2']=hidden_out.T.dot(d_scores)+reg*W2
+    grads['b2']=np.sum(d_scores,0)+reg*b2
+    d_hout=d_scores.dot(W2.T)
+    d_hin=d_hout*(hidden_in>0)
+    grads['W1']=X.T.dot(d_hin)+reg*W1
+    grads['b1']=np.sum(d_hin,0)+reg*b1
+
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
@@ -221,6 +231,18 @@ class TwoLayerNet(object):
     return y_pred
 
 if __name__ == '__main__':
-  a=np.array([[1,2],[2,3],[3,4]])
-  b=np.array([2,2,2]).reshape(3,1)
-  print a*b
+  # a=np.array([[1,2],[2,3],[3,4]])
+  # b=np.array([2,2,2]).reshape(3,1)
+  # print a*b
+  a=np.array([[1,2,3],[2,3,4],[3,4,5],[4,5,6]],dtype=float)
+  # b=np.array([0,1,1])
+  # # print a[xrange(3),b]
+  # print a
+  # print a>2
+  # print a*(a>2)
+  # # a[:,1]/=np.sum(a,1)
+  # print np.sum(a,1,keepdims=True)
+  # print a/np.sum(a,1,keepdims=True)
+  b=np.copy(a)
+  b[0,0]=4
+  print a
