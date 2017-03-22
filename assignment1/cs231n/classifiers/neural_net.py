@@ -163,7 +163,9 @@ class TwoLayerNet(object):
       # TODO: Create a random minibatch of training data and labels, storing  #
       # them in X_batch and y_batch respectively.                             #
       #########################################################################
-      pass
+      index=np.random.choice(np.arange(num_train),size=batch_size)
+      X_batch=X[index]
+      y_batch=y[index]
       #########################################################################
       #                             END OF YOUR CODE                          #
       #########################################################################
@@ -178,7 +180,10 @@ class TwoLayerNet(object):
       # using stochastic gradient descent. You'll need to use the gradients   #
       # stored in the grads dictionary defined above.                         #
       #########################################################################
-      pass
+      self.params['W1']-=learning_rate*grads['W1']
+      self.params['b1']-=learning_rate*grads['b1']
+      self.params['W2']-=learning_rate*grads['W2']
+      self.params['b2']-=learning_rate*grads['b2']
       #########################################################################
       #                             END OF YOUR CODE                          #
       #########################################################################
@@ -223,7 +228,7 @@ class TwoLayerNet(object):
     ###########################################################################
     # TODO: Implement this function; it should be VERY simple!                #
     ###########################################################################
-    pass
+    y_pred=np.argmax(self.loss(X),axis=1)
     ###########################################################################
     #                              END OF YOUR CODE                           #
     ###########################################################################
@@ -231,18 +236,6 @@ class TwoLayerNet(object):
     return y_pred
 
 if __name__ == '__main__':
-  # a=np.array([[1,2],[2,3],[3,4]])
-  # b=np.array([2,2,2]).reshape(3,1)
-  # print a*b
-  a=np.array([[1,2,3],[2,3,4],[3,4,5],[4,5,6]],dtype=float)
-  # b=np.array([0,1,1])
-  # # print a[xrange(3),b]
-  # print a
-  # print a>2
-  # print a*(a>2)
-  # # a[:,1]/=np.sum(a,1)
-  # print np.sum(a,1,keepdims=True)
-  # print a/np.sum(a,1,keepdims=True)
-  b=np.copy(a)
-  b[0,0]=4
-  print a
+  print np.random.choice(np.arange(100),size=4)
+  a=np.array([1,2,3,4])
+  print np.maximum(a,2)
