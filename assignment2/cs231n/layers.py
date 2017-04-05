@@ -167,7 +167,13 @@ def batchnorm_forward(x, gamma, beta, bn_param):
     # the momentum variable to update the running mean and running variance,    #
     # storing your result in the running_mean and running_var variables.        #
     #############################################################################
-    pass
+    sample_mean=(1.0/N)*np.sum(x,0)
+    sample_var=(1.0/N)*np.sum(np.square(x-sample_mean),0)
+    running_mean=momentum*running_mean+(1-momentum)*sample_mean
+    running_var=momentum*running_var+(1-momentum)*sample_var
+    x_norm=(x-running_mean)/(np.sqrt(running_var)+eps)
+    out=gamma*x_norm+beta
+    cache=(x_norm,gamma,beta,running_var,eps)
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
@@ -178,7 +184,7 @@ def batchnorm_forward(x, gamma, beta, bn_param):
     # and shift the normalized data using gamma and beta. Store the result in   #
     # the out variable.                                                         #
     #############################################################################
-    pass
+    out=gamma*((x-running_mean)/(np.sqrt(running_var)+eps))+beta
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
@@ -214,7 +220,12 @@ def batchnorm_backward(dout, cache):
   # TODO: Implement the backward pass for batch normalization. Store the      #
   # results in the dx, dgamma, and dbeta variables.                           #
   #############################################################################
-  pass
+  (x_norm,gamma,beta,running_var,eps)=cache
+  N,D = x_norm.shape
+  dgamma=np.sum(dout*x_norm,0)
+  dbeta=np.sum(dout,0)
+  dx_norm=dout*gamma
+  dx=dx_norm*(np.sqrt(running_var)+eps)
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
