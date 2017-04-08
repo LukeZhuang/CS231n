@@ -179,11 +179,12 @@ class FullyConnectedNet(object):
     for layer in xrange(self.num_layers):
       input_size=input_dim if layer==0 else hidden_dims[layer-1]
       output_size=num_classes if layer==self.num_layers-1 else hidden_dims[layer]
-      self.params['W'+str(layer+1)]=np.random.randn(input_size,output_size)*weight_scale
       # print 'layer %d input %d output %d' %(layer,input_size,output_size)
+      self.params['W'+str(layer+1)]=np.random.randn(input_size,output_size)*weight_scale
       self.params['b'+str(layer+1)]=np.zeros(output_size)
-      # self.params['gamma'+str(layer+1)]=np.zeros(output_size)
-      # self.params['beta'+str(layer+1)]=np.zeros(output_size)
+      if self.use_batchnorm and layer<self.num_layers-1:
+        self.params['gamma'+str(layer+1)]=np.ones(output_size)
+        self.params['beta'+str(layer+1)]=np.zeros(output_size)
     ############################################################################
     #                             END OF YOUR CODE                             #
     ############################################################################
@@ -246,8 +247,17 @@ class FullyConnectedNet(object):
     for layer in xrange(self.num_layers-1):
       W=self.params['W'+str(layer+1)]
       b=self.params['b'+str(layer+1)]
-      scores,cache=affine_relu_forward(scores,W,b)
-      caches.append(cache)
+      if self.use_batchnorm:
+        gamma=self.params['gamma'+str(layer+1)]
+        beta=self.params['beta'+str(layer+1)]
+        scores,cache=affine_batchNorm_relu_forward(scores,W,b,gamma,beta,self.bn_params[layer])
+      else:
+        scores,cache=affine_relu_forward(scores,W,b)
+      if self.use_dropout:
+        scores,cache2=dropout_forward(scores,self.dropout_param)
+        caches.append((cache,cache2))
+      else:
+        caches.append(cache)
     W=self.params['W'+str(self.num_layers)]
     b=self.params['b'+str(self.num_layers)]
     scores,cache=affine_forward(scores,W,b)
@@ -277,13 +287,22 @@ class FullyConnectedNet(object):
     loss,dscore=softmax_loss(scores,y)
     for layer in xrange(self.num_layers):
       W=self.params['W'+str(layer+1)]
-      loss+=0.5*self.reg*(np.sum(W**2))
+      loss+=0.5*self.reg*(np.sum(W*W))
     dscore,dW,db=affine_backward(dscore,caches[-1])
     grads['W'+str(self.num_layers)]=dW+self.reg*self.params['W'+str(self.num_layers)]
     grads['b'+str(self.num_layers)]=db
     for layer in xrange(self.num_layers-1):
       l=self.num_layers-layer-2
-      dscore,dW,db=affine_relu_backward(dscore,caches[l])
+      cache=caches[l]
+      if self.use_dropout:
+        dscore=dropout_backward(dscore,cache[1])
+        cache=cache[0]
+      if self.use_batchnorm:
+        dscore,dW,db,dgamma,dbeta=affine_batchNorm_relu_backward(dscore,cache)
+        grads['gamma'+str(l+1)]=dgamma
+        grads['beta'+str(l+1)]=dbeta
+      else:
+        dscore,dW,db=affine_relu_backward(dscore,cache)
       grads['W'+str(l+1)]=dW+self.reg*self.params['W'+str(l+1)]
       grads['b'+str(l+1)]=db
     ############################################################################
